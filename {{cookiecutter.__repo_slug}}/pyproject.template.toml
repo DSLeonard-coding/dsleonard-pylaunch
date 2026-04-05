@@ -1,0 +1,81 @@
+
+[build-system]
+requires = [
+    "setuptools>=61",
+    "setuptools_scm"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{cookiecutter.project_name}}"
+dynamic = ["version"] 
+requires-python = ">={{cookiecutter.python_version}}"
+description = "{{cookiecutter.description}}"
+readme = "README.md" 
+authors = [
+	{name = "{{cookiecutter.author_name}}", email = "{{cookiecutter.author_email}}"}
+]
+license = { text = "{{cookiecutter.license}}"}
+classifiers = [
+  # Information for PyPi
+  # How mature is this project? Common values are
+  #   3 - Alpha
+  #   4 - Beta
+  #   5 - Production/Stable
+  "Development Status :: 3 - Alpha",
+  # Can specify more versions
+  "Programming Language :: Python :: 3",
+]
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "sync-hook",
+]
+
+[tool.uv.sources]
+# Hack: uv doesn't have native post-install hooks, so we declare a local
+# path dependency (sync-hook). When `uv sync` runs, it executes sync-hook's setup.py.
+# setup.py double-forks a detached background daemon to wait out the lock, then
+# executes scripts/run_inits.py which runs all __init__.py files
+# to generate .pyi autocomplete files for the IDE.
+# Whew... But it just works. ;)
+sync-hook = { path = "./sync_hook"}
+
+[project.urls]
+"Repository" = "https://{{cookiecutter.repo}}/{{cookiecutter.repo_namespace}}/{{cookiecutter.__repo_slug}}"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = [
+    "test",
+    "tests"
+]
+
+[tool.setuptools.package-data]
+"{{cookiecutter.project_pkg}}" = ["py.typed"]
+
+{% if cookiecutter.install_command_entry_point %}
+#The left side is the installed command name.  Right side is the entry point
+[project.scripts]
+{{cookiecutter.project_name}} = "{{cookiecutter.project_pkg}}.core:{{cookiecutter.project_pkg}}"
+{% else %}
+[project.scripts]
+#Uncomment and edit this to add an "executable" script entry point.
+#The left side is the installed command name.  Right side is the entry point
+#{{cookiecutter.project_name}} = "{{cookiecutter.project_pkg}}.core:{{cookiecutter.project_pkg}}"
+{% endif %}
+
+#enable scm dynamic versioning, version must be included in dynamic under project above. 
+[tool.setuptools_scm]
+write_to = "src/{{cookiecutter.project_pkg}}/_version.py"
+fallback_version = "0.0.1.dev0"
+git_describe_command = "git describe --dirty --tags --long --match '*v[0-9]*'"
+#read tags like [prefix-]v1.3[.4[.5[...]]][rc0][-postfix]  only v1.3 part required
+#rc part is kept as a local metadata so v1.3rc0 satifies v1.3 in testing.
+#rc tags are not meant to be pushed to pypi.
+tag_regex = "^(?:(?P<pre>.*)-)?v(?P<version>[0-9.]+)(?:(?P<local>[a-z]+[0-9]*))?(-(?P<post>r[0-9]+))?.*$"
+

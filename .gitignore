@@ -1,0 +1,5 @@
+ignored_files/
+test/test-projects/
+slug
+*-swp
+#**/uv.toml
