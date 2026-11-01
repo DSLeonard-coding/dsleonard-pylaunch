@@ -12,7 +12,7 @@ from pathlib import Path
 
 def find_or_install_uv(venv_dir, toml_dir,reset=False):
     """
-    spin up a venv in venv_dir using pyproject.toml in toml_dir
+    find uv executable or install it.
     """
     abs_venv_dir = os.path.abspath(venv_dir)
     os.chdir(toml_dir) # make pyproject.toml visible.

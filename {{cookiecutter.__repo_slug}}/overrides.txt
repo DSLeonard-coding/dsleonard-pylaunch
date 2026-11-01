@@ -1,0 +1,8 @@
+# Place local file overrides here.  They will override all transitive dependencies.
+# This works very well for source distribution when locking everything to latest versions.
+#
+#Example for package dsleonard-qx using an absolute path, note the three leading slashes
+#dsleonard-qx@file:///home/osboxex/repos/dsleonard-qx
+#
+#Example using a relative path, relative to the project directory.  Note the two leading slashes.
+#dsleonard-qx@file://../dsleonard-qx

@@ -15,6 +15,10 @@
     "repo": "github.com",
     "repo_type": "github",
     "repo_namespace": "DSLeonard-coding",
+    "_dsleonard_git_tools_path": "dsleonard-git-tools@file://../../../../dsleonard-git-tools/",
+    "_dsleonard_cc_rc_merge_path": "dsleonard-cc-rc-merge@file://../../../../dsleonard-cc-rc-merge/",
+    "_dsleonard_qx_path": "dsleonard-qx@file://../../../../dsleonard-qx/",
+    "_use_local_deps": false,
     "_copy_without_render": [
       ".github/workflows/*",
       ".github/*",
@@ -34,27 +38,24 @@
     "__executable_name": "example-pylaunch-project",
     "_template": "../",
     "_output_dir": "/home/osboxes/repos/pylaunch/test/test-projects",
-    "_repo_dir": "/tmp/cookiecutter4q0iy8cw/pylaunch",
+    "_repo_dir": "/tmp/cookiecutters2glsn28/pylaunch",
     "_checkout": null
   },
   "_cookiecutter": {
-    "project_name": "test_project",
-    "project_pkg": "{{ cookiecutter.project_name.replace('-', '_') }}",
-    "description": "Test project",
+    "project_name": "example-pylaunch-project",
+    "project_pkg": "example_pylaunch_project",
+    "description": "Example dsleonard-pylaunch project",
     "license": "MIT, attribution required",
     "install_command_entry_point": true,
     "python_version": "3.10",
     "auto_push_new_repo": true,
-    "overwrite_repo": "no",
+    "overwrite_repo": "YES",
     "create_wiki_page": true,
     "make_repo_public": false,
     "author_name": "Douglas Leonard",
     "author_email": "dleonard.dev@gmail.com",
     "repo": "github.com",
-    "repo_type": [
-      "github",
-      "gitlab"
-    ],
+    "repo_type": "github",
     "repo_namespace": "DSLeonard-coding"
   }
 }

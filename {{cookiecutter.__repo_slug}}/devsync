@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -e
+
+VENV_DIR=".venv"
+
+if [ ! -d "$VENV_DIR" ]; then
+    uv venv "$VENV_DIR"
+fi
+
+# Build ("compile") requirements.txt from pyproject.toml with overrides.txt applied:
+COMPILE_CMD=(uv pip compile pyproject.toml -o requirements.txt)
+if [ -f "overrides.txt" ]; then
+    COMPILE_CMD+=(--override overrides.txt)
+fi
+"${COMPILE_CMD[@]}"
+
+#Sync the result
+uv pip sync --python "$VENV_DIR/bin/python" requirements.txt
+
+#We don't get a lock so uv run needs a --no-sync
+exec uv run --no-sync "$@"

@@ -17,7 +17,7 @@ __all__=[
 ]
 # Set __export__all__ to True to elevate names in __all__ to package level,  ie now
 # from '{{cookiecutter.project_pkg}}' import *
-# For single modules, this prevents my_class.MyClass() redundancy.
+# For single-class modules, this prevents my_class.MyClass() redundancy or manual __init__.py maintenance.
 __export_all__ = True
 
 #From bash, use export {{cookiecutter.project_pkg}}_DEBUG="True" to enable debug output

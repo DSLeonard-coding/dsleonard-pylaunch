@@ -5,6 +5,7 @@
       <set>
         <option value="$PROJECT_DIR$/test/test-projects/example-pylaunch-project/src" />
         <option value="$PROJECT_DIR$/test/test-projects/example-pylaunch-project/post_gen_resources/src" />
+        <option value="$PROJECT_DIR$/{{cookiecutter.__repo_slug}}/src" />
       </set>
     </option>
   </component>

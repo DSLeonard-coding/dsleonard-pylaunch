@@ -38,18 +38,23 @@ for private repos replace ```git+https://```   with ```git+ssh://git@``` to use 
 
 
 ### Use in a quick script:
-The --script option will embedd the dependencies to the top of your script, avoiding the need for a pyproject.toml
+The --script option will embed the dependencies to the top of your script, avoiding the need for a pyproject.toml
 ```bash
 uv add --script myscript.py "{{ cookiecutter.__repo_slug }} @ git+https://{{ cookiecutter.repo }}/{{ cookiecutter.repo_namespace }}/{{ cookiecutter.__repo_slug }}.git"
 ```
 Then add the following uv shebang as the first line in your script file:
 ```sh
-#!/usr/bin/env -S uv run --script
+#!/usr/bin/env -S uv run --script --python 3.13
 ```
-and just after the ```uv add```:
+and make the script executable:
+```bash
+chmod +x myscript.py
+```
+Then you can just execute your script:
 ```bash
 ./myscript.py
 ```
+This spins up a cached virtual environment with all the dependencies installed associated just with this script.
 
 Or if you don't like the shebang, leave it out and run with uv manually with
 ```bash
@@ -57,7 +62,7 @@ uv run --python 3.13 myscript.py    # the --python <version> is optional
 ```
 
 
-However, if you want today's version of your script to always run with today's tested dependancies, 
+However, if you want today's version of your script to always run with today's tested dependencies, 
 you need to commit it with an extra lock file anyway, made with:
 
 ```bash
@@ -71,9 +76,9 @@ that every commit works the same as the day you committed it.
 Here ```uv add``` adds the dependency to an existing pyproject.toml file, or creates a new one, and actually
 does a ``` uv sync ```, which replaces ```conda activate``` and ```pip install```.  It creates a venv that applies within that directory and all subdirectories,  installs the latest version of the library in it, and creates the uv.lock file to lock dependency versions for future use.  
 
-To make sure your script always builds with the same library version you tested with, include the created uv.lock file in your distribution of the script (git or otherwise).  Further use of ```uv sync``` will be version pinned, insuring old git commits are locked to build the same as when the commit was made.  
+To make sure your script always builds with the same library version you tested with, include the created uv.lock file in your distribution of the script (git or otherwise).  Further use of ```uv sync``` will be version pinned, ensuring old git commits are locked to build the same as when the commit was made.  
 
-Do not be tempted to select a tag in the add command.  This will strongly restrict/break dependency resolution in even moderately bigger projects.  This is what uv.lock is for, especially with source dependencies.
+Do not be tempted to select a tag in the add command.  This will strongly restrict/break dependency resolution in even moderately bigger projects.  Source distribution is different from binary registry distribution. Version constraints essentially do not work for source-distributed dependencies.  This is what uv.lock is for.
 
 Resolving dependency problems with source builds has become almost impossible with pip and was never great.  The lock file and various overrides make
 uv a clear winner for source-based (non-pypi) github sharing.

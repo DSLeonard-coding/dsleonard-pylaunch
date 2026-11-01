@@ -1,8 +1,8 @@
-#dsl-pylaunch post_gen_project script to setup local and remote repo, etc.
-#(C) D.S. Leonard 2025
+# dsl-pylaunch post_gen_project script to setup local and remote repo, etc.
+# (C) D.S. Leonard 2025
 # MIT,  use with attribution only.
-#TODO don't crash out on no overwrite.  But this is a little hard.
-#Whole report should change.
+# TODO don't crash out on no overwrite.  But this is a little hard.
+# Whole report should change.
 
 import os
 import platform
@@ -18,13 +18,14 @@ import getpass
 
 from dsleonard_cc_rc_merge import cc_rc_merge
 from dsleonard_qx import *
-#from dsleonard_git_tools.dsleonard_git_api import *
+# from dsleonard_git_tools.dsleonard_git_api import *
 from dsleonard_git_tools import *
-#print(f'--- LOADING FROM: {dsleonard_git_tools.__file__} ---')
+# print(f'--- LOADING FROM: {dsleonard_git_tools.__file__} ---')
 import json
 
 # post_gen_project.by implementation by Douglas S. Leonard, Copyright 2024.  MIT license.
 import sys
+
 # Initialize the Git repository and push it to GitLab
 repo_name = "{{ cookiecutter.__repo_slug }}"
 description = "{{ cookiecutter.description }}"
@@ -35,7 +36,7 @@ author_email = "{{ cookiecutter.author_email }}"
 overwrite_repo = "{{ cookiecutter.overwrite_repo }}"
 repo_type = "{{cookiecutter.repo_type}}"
 auto_push = {{cookiecutter.auto_push_new_repo}}
-#Somehow the CC vars get pasted as capitlaized True/False:
+# Somehow the CC vars get pasted as capitlaized True/False:
 make_repo_public = {{cookiecutter.make_repo_public}}
 is_create_wiki = {{cookiecutter.create_wiki_page}}
 is_executable_project = {{cookiecutter.install_command_entry_point}}
@@ -45,11 +46,15 @@ main_proj_dir = ""
 summary = []
 disclaimers = []
 
+# Developer WARNING:  Windows gitbash shell won't take single quotes inside a command
+# Therefore we should always use single quotes on the outside and double quotes inside.
+
 debug = False  # verbose output
+
 
 def main():
     global main_proj_dir
-    main_proj_dir=os.getcwd()
+    main_proj_dir = os.getcwd()
     uv_bin = sys.argv[1]
     os.environ["SETUPTOOLS_SCM_PRETEND_VERSION"] = "0.1.0"
     qx(f"{uv_bin} add -r dependencies.txt")
@@ -69,7 +74,7 @@ def main():
     rc_path = os.path.expanduser("~/.cookiecutterrc")
     cc_data = json.loads(r'{{ cookiecutter | jsonify | replace("\n", "") }}')
 
-    #merge configs with user defaults, silence status output:
+    # merge configs with user defaults, silence status output:
     qx.verbosity_thresholds(verbose_thrsh=qx.PRIORITY)
     cc_rc_merge.merge_rc_from_json(cc_data, rc_path=rc_path)
     qx.verbosity_thresholds(verbose_thrsh=qx_verbosity)
@@ -85,10 +90,12 @@ def main():
     for line in disclaimers:
         print(line)
 
+
 def add_requirements(uv_bin):
     qx(f"{uv_bin} add -r dependencies.txt")
-    qx("rm requirements-cleaned.txt")
-    qx("rm dependencies.txt")
+    Path("requirements-cleaned.txt").unlink()
+    Path("dependencies.txt").unlink()
+
 
 def open_docs(filepath="README.md"):
     if platform.system() == 'Darwin':  # macOS
@@ -99,7 +106,8 @@ def open_docs(filepath="README.md"):
         subprocess.call(('xdg-open', filepath))
 
 
-def initialize_git_with_remote(uv_bin,host, repo_namespace, repo_name, overwrite_repo, description, repo_type,author_name,author_email):
+def initialize_git_with_remote(uv_bin, host, repo_namespace, repo_name, overwrite_repo, description, repo_type,
+                               author_name, author_email):
     if author_name == None:
         git_name_result = git("config --get user.name")
         if git_name_result.stdout.strip():
@@ -109,7 +117,7 @@ def initialize_git_with_remote(uv_bin,host, repo_namespace, repo_name, overwrite
             raise RuntimeError("No git author_name provided or found.") from None
     if author_email == None:
         git_email_result = git("config --get user.email")
-        if git_email_result.stdout.strip():
+        if not git_email_result.stdout.strip():
             raise RuntimeError("No git author_email provided or found.") from None
 
     msg(f"Initializing git repository for {repo_name}...")
@@ -118,84 +126,87 @@ def initialize_git_with_remote(uv_bin,host, repo_namespace, repo_name, overwrite
     git(f"config user.name {author_name}")
     git(f"config user.email {author_email}")
 
-    git(f"commit --allow-empty -m 'empty commit'")
-    git(f"tag empty'")
+    git(f'commit --allow-empty -m "empty commit"')
+    git(f"tag empty")
 
     git(["add", "."])
-    git(f"commit -m 'Initial commit of {repo_name}'")
+    git(f'commit -m "Initial commit of {repo_name}"')
 
     dflt_branch = git(["rev-parse", "--abbrev-ref", "HEAD"]).lines[0]
     msg(f"Local git repository has been created and and is ready to push:")
 
-
-
-    force_flag, recreate_repo = (True, True ) if overwrite_repo == "YES" else (True, False)
+    force_flag, recreate_repo = (True, True) if overwrite_repo == "YES" else (True, False)
     remote_push_status = True
     try:
-        repo=CreateRemoteManager(host,repo_namespace,repo_name,recreate_repo,description,repo_type)
+        repo = CreateRemoteManager(host, repo_namespace, repo_name, recreate_repo, description, repo_type)
         repo.create_remote_repo_if_allowed("origin")
         if repo_type == "gitlab":
             repo.apply_default_protections(dflt_branch)
-        repo.setup_ssh_keys()  #optional, can push with token directly.
-        repo.push_git_webhost(dflt_branch,force_flag)
+        repo.setup_ssh_keys()  # optional, can push with token directly.
+        repo.push_git_webhost(dflt_branch, force_flag)
     except Exception as e:
-        print (str(e).split("Traceback")[0].strip())
+        print(str(e).split("Traceback")[0].strip())
         remote_push_status = False
-        disclaimers.append(f"\n{' '*4} Mission Note: Unable to create or push to remote repo.\n"
-                           f"{' '*8}Your local repository is setup.\n"
-                           f"{' '*8}You can manually setup your remote or review error messages above and try again.\n\n")
+        disclaimers.append(f"\n{' ' * 4} Mission Note: Unable to create or push to remote repo.\n"
+                           f"{' ' * 8}Your local repository is setup.\n"
+                           f"{' ' * 8}You can manually setup your remote or review error messages above and try again.\n\n")
 
     try:
         repo.setup_ci_secrets()
     except Exception as e:
-        print (str(e).split("Traceback")[0].strip())
-        raise RuntimeError("\n{' '*4}Mission Note: Unable to setup authorization keys for CI/CD\n"
-                           f"{' '*8}Your repo was successfully created and pushed to the remote.\n"
-                           f"{' '*8}This only impacts automation on the remote, which you can setup manually.\n")
-    wiki_url=""
+        print(str(e).split("Traceback")[0].strip())
+        raise RuntimeError(f"\n{' ' * 4}Mission Note: Unable to setup authorization keys for CI/CD\n"
+                           f"{' ' * 8}Your repo was successfully created and pushed to the remote.\n"
+                           f"{' ' * 8}This only impacts automation on the remote, which you can setup manually.\n")
+    wiki_url = ""
     if is_create_wiki:
+        # Get a clean slate for the wiki
         git("checkout --orphan wiki")
-        git("rm -rf . --cached")
+        # git("rm -rf . --cached")
         git("rm -rf .")
-        qx(f"echo '# {repo_name} Wiki  \n' >> home.md")
-        #TODO, mark the url as public (no _)
-        qx(f'echo "[Link to the project repo]({repo.https_url})\n" >> home.md')
+        # Restore a few things we still want.
+        git(f"checkout {dflt_branch} -- .github .gitlab-ci.yml .gitignore ci")
+
+        # Create our wiki.  Looks silly but we're like 6 levels deep in inception here.
+        # Sneaking a temp file in is not worth the thought process:
+        wiki_file = Path("home.md")
+        wiki_file.write_text(f"# {repo_name} Wiki  \n\n[Link to the project repo]({repo.https_url})\n\n")
 
         # Add a doctoc tag to home.md.  Optional but makes TOC location explicit:
-        doctoc_tags=textwrap.dedent('''
+        doctoc_tags = textwrap.dedent('''
             <!-- START doctoc generated TOC please keep comment here to allow auto update -->
             <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-            
+
             <!-- END doctoc generated TOC please keep comment here to allow auto update -->
             '''
-        )
-        qx(f'echo "{doctoc_tags}" >> home.md')
-        qx(f"echo '\n\n## Section to be written' >> home.md")
-        qx(f"echo '### Subsection to be written' >> home.md")
+                                      )
+        with wiki_file.open("a") as f:
+            f.write(doctoc_tags)
+            f.write("\n\n## Section to be written\n")
+            f.write("### Subsection to be written\n")
         git("add home.md")
         # Add the doctoc action workflow for github:
         git("add .github/workflows/toc.yml")
-        git("commit -m 'First commit of wiki'")
+        git('commit -m "First commit of wiki"')
         push_wiki_status = False
         if auto_push:
             try:
                 repo.push_git_webhost("wiki", force_flag)
                 push_wiki_status = True
-            except:
+            except Exception:
                 push_wiki_status = False
 
         if not auto_push or push_wiki_status == False:
-            disclaimers.append(f"{' '* 4}Mission Note:  A wiki branch was created but not pushed")
-            disclaimers.append(f"{' '* 8}Use` git push -u origin wiki` to deploy objective")
+            disclaimers.append(f"{' ' * 4}Mission Note:  A wiki branch was created but not pushed")
+            disclaimers.append(f"{' ' * 8}Use` git push -u origin wiki` to deploy objective")
 
-
-        wiki_url = repo.set_branch_wiki_link("wiki","home.md")
+        wiki_url = repo.set_branch_wiki_link("wiki", "home.md")
         git(f'checkout -f {dflt_branch}')
 
-    #push a tag, trigger workflow
+    # push a tag, trigger workflow
     git('tag v0.0.1')
     if auto_push:
-        repo.push_git_webhost(dflt_branch,force_flag,push_tags=True)
+        repo.push_git_webhost(dflt_branch, force_flag, push_tags=True)
     else:
         disclaimers.append(f"{' ' * 4}Mission Note:  A tag was created but not pushed")
         disclaimers.append(f"{' ' * 8}Use ` git push origin --tags` to deploy objective")
@@ -244,18 +255,19 @@ def initialize_git_with_remote(uv_bin,host, repo_namespace, repo_name, overwrite
     if show_repo:
         webbrowser.open(repo.https_url)
 
+
 project_path = os.getcwd()
 print(f"\n🚀 New repo created at: {project_path}")
 
 qx_verbosity = qx.INFO
 if debug:
-    qx_verbosity=qx.DEBUG
+    qx_verbosity = qx.DEBUG
     qx.verbosity_thresholds(verbose_thrsh=qx_verbosity)
 
 try:
     cwd = os.getcwd()
     main()
-except (SystemExit,Exception) as e:
+except (SystemExit, Exception) as e:
     if isinstance(e, SystemExit) and (e.code == 0 or e.code is None):
         sys.exit(0)
 
@@ -264,7 +276,7 @@ except (SystemExit,Exception) as e:
     print("Your project,repo, or remotes may not be fully configured.")
     if not isinstance(e, SystemExit):
         os.chdir(cwd)
-        errfile="post-gen-runner-error-log.txt"
+        errfile = "post-gen-runner-error-log.txt"
         with open(errfile, "w") as f:
             traceback.print_exc(file=f)
             print(e, file=f)

@@ -1,3 +1,5 @@
 .setup_venv/*
 .setup_venv
 !**version.py
+overrides.txt
+requirements.txt

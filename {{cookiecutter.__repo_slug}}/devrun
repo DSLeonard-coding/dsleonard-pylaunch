@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [[ $@ == "" ]]; then
+   echo "For use after devsync. Runs a target without resyncing."
+   echo "Basically just a convenience 'alias' for uv run --no-sync."
+   echo ""
+   echo "Usage:"
+   echo "  ./devrun <target>         (Runs a pyproject.toml [project.scripts] target)"
+   echo "  ./devrun myfile.py        (Runs any local Python script directly)"
+   echo "  ./devrun <command>        (Runs any other CLI tool inside the environment)"
+else
+   # If the first argument ends in .py, check if it's executable
+   if [[ "$1" == *.py ]]; then
+      # If NOT executable, prepend 'python' automatically so you don't have to type it
+      if [[ ! -x "$1" ]]; then
+         uv run --no-sync python "$@"
+         exit $?
+      fi
+   fi
+
+   # Default execution for everything else
+   uv run --no-sync "$@"
+fi
