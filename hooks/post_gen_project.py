@@ -25,7 +25,7 @@ def cleanup(cwd, venv_dir):
         shutil.rmtree(Path(venv_dir))
         os.chdir(cwd)
         shutil.rmtree(Path("post_gen_resources"))
-    except:
+    except Exception:
         # If cleanup fails don't be too loud about it.
         pass
 
