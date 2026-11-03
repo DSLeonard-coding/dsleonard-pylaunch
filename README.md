@@ -14,8 +14,10 @@ Even the smallest helper modules can now, **in seconds**, be setup to run or use
 Install uv if you don't have it:
 ```console
 curl -LsSf https://astral.sh/uv/install.sh | sh     # or if you have pip:  pip install pipx; pipx install uv
+source $HOME/.local/bin/env
 ```
-If your shell is tcsh type ```rehash``` to refresh your path.  
+The second command should refresh your path to make `uv` and `uvx` commands available, but if not, restart your terminal.
+
 Then run  pylaunch via cookiecutter without pre-installing either: 
 ```console
 uvx cookiecutter https://GitHub.com/DSLeonard-coding/dsleonard-pylaunch.git
@@ -170,7 +172,7 @@ to make generation of pyi files as automatic as possible.   And that's it.
 The scaffolding here is significant so that the use can be simple.  
 
 ### Developing with local source overrides
-pyprojetc.toml defines dependency locations, including git sources and this determines where your libraries come from, including ones you wrote. A big aim of this launcher
+pyprojetc.toml defines dependency locations, including git sources, and this determines where your libraries come from, including ones you wrote. A big aim of this launcher
 is to make publishing small, reusable interlinked modules easy and painless.
 
 But developing related sources is a pain if you have to keep publishing one to GitLab 
@@ -190,13 +192,7 @@ PyLaunch is 99% windows compatible. See [Windows Issues](#windows-issues)
 
 This has been tested on a Git Bash terminal in windows. So you should install Git Bash. Because the project uses symlinks, you must either enable developer mode on windows (search in settings) or, simpler and probably safer, run the Git Bash terminal as administrator.  
 
-You will probably need to run
-```sh
-source $HOME/.local/bin/env  
- ```
-or restart your shell after installing uv the first time.  You should get a message about it when you try to run uv.
-
-Also for making symlinks work when uv clones the project you will first need to run this command once: 
+To make symlinks work when uv clones the project you will first need to run this command once: 
 ```sh
 git config --global core.symlinks true
 ```
