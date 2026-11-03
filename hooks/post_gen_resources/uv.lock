@@ -301,8 +301,8 @@ dependencies = [
 
 [[package]]
 name = "dsleonard-git-tools"
-version = "0.1.0.dev5+g9bc1fd087"
-source = { git = "https://github.com/DSLeonard-coding/dsleonard-git-tools#9bc1fd0874376af279271a299e3ab13080668600" }
+version = "0.1.0.dev6+g60b6458ea"
+source = { git = "https://github.com/DSLeonard-coding/dsleonard-git-tools#60b6458ea0e5fadc040996d1e3222cdaa41079bc" }
 dependencies = [
     { name = "dsleonard-qx" },
     { name = "pygithub" },
