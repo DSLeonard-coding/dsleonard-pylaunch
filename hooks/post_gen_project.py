@@ -14,12 +14,16 @@ use_local_deps = {{ cookiecutter._use_local_deps }}
 dsleonard_git_tools_path = "{{ cookiecutter._dsleonard_git_tools_path }}"
 dsleonard_cc_rc_merge_path ="{{ cookiecutter._dsleonard_cc_rc_merge_path }}"
 dsleonard_qx_path ="{{ cookiecutter._dsleonard_qx_path }}"
+keep_scaffolding = "{{ cookiecutter._keep_scaffolding | default('') }}".lower() in ("true", "yes", "1")
 
 #from post_gen_resources import post_gen_runner
 sys.path.append('post_gen_resources/')
 from find_or_install_uv import find_or_install_uv
 
 def cleanup(cwd, venv_dir):
+    if keep_scaffolding:
+        print(f"Debug: leaving {resource_dir} and its .venv in place.")
+        return
     try:
         os.chdir(cwd)
         shutil.rmtree(Path(venv_dir))
@@ -37,7 +41,7 @@ def main():
         #if it's already setup, we'll just get the exe:
         cwd=os.getcwd()
         resource_dir = "post_gen_resources"
-        venv_dir = os.path.join(resource_dir, ".venv")
+        venv_dir = Path(".venv")
         #        python_exe, uv_bin = provision_venv(venv_dir, toml_dir=resource_dir)
         uv_bin = find_or_install_uv(venv_dir, toml_dir=resource_dir)
         os.chdir(cwd)
@@ -48,11 +52,12 @@ def main():
         print(f"Error occurred in post-project environment setup {e}")
         sys.exit(1)
 
+    resource_dir_path = Path(resource_dir)
+    os.chdir(resource_dir_path)
     try:
-        resource_dir_path = Path(resource_dir)
-        reqs_file = resource_dir_path / "requirements.txt"
-        overrides_file = resource_dir_path / "overrides.txt"
-        pyproject_file = resource_dir_path / "pyproject.toml"
+        reqs_file = Path("requirements.txt")
+        overrides_file = Path("overrides.txt")
+        pyproject_file =  Path("pyproject.toml")
 
         if use_local_deps:
             print("Configuring local dependency overrides.")
@@ -69,10 +74,10 @@ def main():
             venv_cmd = [uv_bin, "venv", venv_dir, "--allow-existing"]
             subprocess.run(venv_cmd, check=True)
 
-            lock_file = resource_dir_path / "uv.lock"
+            lock_file = Path("uv.lock")
 
             if lock_file.exists():
-                requirements_in = resource_dir_path / "requirements.in"
+                requirements_in = "requirements.in"
                 compile_target = str(requirements_in)
                 print("Found existing uv.lock. Exporting baseline...")
                 export_cmd = [
@@ -81,7 +86,6 @@ def main():
                     "--locked",
                     "--format", "requirements-txt",
                     "-o", compile_target,
-                    "--project", resource_dir
                 ]
                 subprocess.run(export_cmd, check=True)
             else:
@@ -98,7 +102,6 @@ def main():
 
             print("Compiling requirements...")
             subprocess.run(compile_cmd, check=True)
-
             # lock the requirements.txt into the venv
             sync_cmd = [uv_bin, "pip", "sync", str(reqs_file), "--prefix", str(venv_dir)]
 
@@ -106,6 +109,7 @@ def main():
             subprocess.run(sync_cmd, check=True)
 
             print(f"Executing post-gen runner... with {uv_bin}")
+            os.chdir(cwd)
             subprocess.run([
                 uv_bin, "run",
                 "--no-sync",
@@ -114,6 +118,7 @@ def main():
             ], check=True)
 
         else:
+            os.chdir(cwd)
             print(f"Executing post-gen runner... with {uv_bin}")
             subprocess.run([
                 uv_bin, "run",
@@ -124,10 +129,10 @@ def main():
 
     except subprocess.CalledProcessError as e:
         print(f"Error running post_gen_runner.py")
-        cleanup(cwd,venv_dir)
+        cleanup(cwd, os.path.join(cwd, resource_dir_path, venv_dir))
         sys.exit(0)
 
-    cleanup(cwd, venv_dir)
+    cleanup(cwd, os.path.join(cwd,resource_dir_path,venv_dir))
 
 if __name__ == "__main__":
     main()

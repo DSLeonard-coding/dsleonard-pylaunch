@@ -3,3 +3,9 @@ test/test-projects/
 slug
 *-swp
 #**/uv.toml
+/hooks/post_gen_resources/post_gen_resources.egg-info/dependency_links.txt
+/hooks/post_gen_resources/post_gen_resources.egg-info/entry_points.txt
+/hooks/post_gen_resources/post_gen_resources.egg-info/PKG-INFO
+/hooks/post_gen_resources/post_gen_resources.egg-info/requires.txt
+/hooks/post_gen_resources/post_gen_resources.egg-info/SOURCES.txt
+/hooks/post_gen_resources/post_gen_resources.egg-info/top_level.txt
