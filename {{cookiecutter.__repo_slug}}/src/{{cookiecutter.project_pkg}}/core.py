@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 # main.py
 # Copyright  {{cookiecutter.author_name}} {% now 'utc', '%Y' %}.
 #
