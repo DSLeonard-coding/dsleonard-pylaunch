@@ -20,6 +20,14 @@ keep_scaffolding = "{{ cookiecutter._keep_scaffolding | default('') }}".lower() 
 sys.path.append('post_gen_resources/')
 from find_or_install_uv import find_or_install_uv
 
+def local_deps_banner():
+    red = "\033[1;37;41m"; off = "\033[0m"
+    bar = "!" * 72
+    print(f"\n{red}{bar}{off}")
+    print(f"{red}  LOCAL DEPENDENCY MODE: this project is NOT using released packages.{off}")
+    print(f"{red}  Unset _use_local_deps in ~/.cookiecutterrc and retest before publishing.{off}")
+    print(f"{red}{bar}{off}\n")
+
 def cleanup(cwd, venv_dir):
     if keep_scaffolding:
         print(f"Debug: leaving {resource_dir} and its .venv in place.")
@@ -35,7 +43,8 @@ def cleanup(cwd, venv_dir):
 
 def main():
     print("Running post generation script...")
-
+    if use_local_deps:
+        local_deps_banner()
 
     try:
         #if it's already setup, we'll just get the exe:
@@ -133,6 +142,8 @@ def main():
         sys.exit(0)
 
     cleanup(cwd, os.path.join(cwd,resource_dir_path,venv_dir))
+    if use_local_deps:
+        local_deps_banner()
 
 if __name__ == "__main__":
     main()
