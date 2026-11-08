@@ -4,7 +4,7 @@
   "description": "Test project",
   "license": "All Rights Reserved",
   "install_command_entry_point": true,
-  "python_version": "3.10",
+  "minimum python_version to support (low for libraries, high for apps)": "3.10",
   "overwrite_repo": "no",
   "auto_push_new_repo": true,
   "create_wiki_page": true,
